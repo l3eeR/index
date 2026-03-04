@@ -126,7 +126,7 @@ async function calculate() {
     // 🔥 ส่งเข้า Google Sheet
 await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
   method: "POST",
-  mode: "no-cors",   // 👈 เพิ่มบรรทัดนี้
+  mode: "no-cors",
   headers: {
     "Content-Type": "application/json"
   },
@@ -137,10 +137,9 @@ await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc
     final: finalValue,
     receiveAmount: receiveAmount
   })
-})
-.then(res => res.text())
-.then(data => {
-  console.log("บันทึกสำเร็จ:", data);
+});
+
+console.log("ส่งข้อมูลเรียบร้อย");
 })
 .catch(err => {
   console.error("เกิดข้อผิดพลาด:", err);
@@ -155,4 +154,5 @@ await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc
 </body>
 
 </html>
+
 
