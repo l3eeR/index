@@ -124,20 +124,26 @@ async function calculate() {
     resultDiv.innerHTML = resultText;
 
     // 🔥 ส่งเข้า Google Sheet
-    await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        amount: amount,
-        percent: percent,
-        receivePercent: receivePercent,
-        final: finalValue,
-        receiveAmount: receiveAmount
-      })
-    });
+await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    amount: amount,
+    percent: percent,
+    receivePercent: receivePercent,
+    final: finalValue,
+    receiveAmount: receiveAmount
+  })
+})
+.then(res => res.text())
+.then(data => {
+  console.log("บันทึกสำเร็จ:", data);
+})
+.catch(err => {
+  console.error("เกิดข้อผิดพลาด:", err);
+});
 
   } catch {
     resultDiv.innerText = "กรุณาใส่ตัวเลขหรือสมการให้ถูกต้อง";
@@ -146,4 +152,5 @@ async function calculate() {
 </script>
 
 </body>
+
 </html>
