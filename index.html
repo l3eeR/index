@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>เครื่องคิดเปอร์เซ็นต์</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fc;
+    padding: 30px;
+  }
+  .container {
+    max-width: 400px;
+    margin: auto;
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #4a8cff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #346ed1;
+  }
+  #result {
+    margin-top: 25px;
+    font-size: 18px;
+    text-align: center;
+    color: #222;
+  }
+  .final-line {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>คำนวณเปอร์เซ็นต์ (%)</h2>
+
+  <label>ยอดเงิน (บวก ลบ คูณ หาร ได้)</label>
+  <input type="text" id="amount" placeholder="เช่น 1000+500-200">
+
+  <label>หักเปอร์เซ็นต์ (%)</label>
+  <input type="number" id="percent" placeholder="ใส่ % ที่ต้องการ">
+
+  <label>% ที่จะได้รับกลับจริง</label>
+  <input type="number" id="receivePercent" placeholder="เช่น 86">
+
+  <button onclick="calculate()">คำนวณ</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+async function calculate() {
+
+  let amountInput = document.getElementById("amount").value;
+  const percent = parseFloat(document.getElementById("percent").value);
+  const receivePercent = parseFloat(document.getElementById("receivePercent").value);
+  const resultDiv = document.getElementById("result");
+
+  try {
+
+    const amount = Function('"use strict"; return (' + amountInput + ')')();
+    if (isNaN(amount)) throw "error";
+
+    let resultText = "";
+    let finalValue = "";
+    let receiveAmount = "";
+
+    // 🔹 คำนวณแบบหัก %
+    if (!isNaN(percent)) {
+      const discount = (amount * percent) / 100;
+      finalValue = amount - discount;
+
+      resultText += 
+        "ยอดรวมสแกน %: <b>" + amount.toLocaleString() + "</b><br>" +
+        "หัก: <b>" + discount.toLocaleString() + "</b><br>" +
+        "ยอดรับคืนสุทธิ: <b>" + finalValue.toLocaleString() + "</b><br>" +
+        "<hr>" +
+        "<div class='final-line'>" +
+        amount.toLocaleString() + " - " + percent + "% = " + finalValue.toLocaleString() +
+        "</div><hr>";
+    }
+
+    // 🔹 คำนวณจาก % ที่ได้รับกลับ
+    if (!isNaN(receivePercent)) {
+      receiveAmount = (amount * receivePercent) / 100;
+
+      resultText += 
+        "% ที่ได้รับกลับ: <b>" + receivePercent + "%</b><br>" +
+        "ยอดสุทธิที่ได้รับ: <b>" + receiveAmount.toLocaleString() + "</b>";
+    }
+
+    resultDiv.innerHTML = resultText;
+
+    // 🔥 ส่งเข้า Google Sheet
+    await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount: amount,
+        percent: percent,
+        receivePercent: receivePercent,
+        final: finalValue,
+        receiveAmount: receiveAmount
+      })
+    });
+
+  } catch {
+    resultDiv.innerText = "กรุณาใส่ตัวเลขหรือสมการให้ถูกต้อง";
+  }
+}
+</script>
+
+</body>
+</html>
