@@ -126,6 +126,7 @@ async function calculate() {
     // 🔥 ส่งเข้า Google Sheet
 await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
   method: "POST",
+  mode: "no-cors",   // 👈 เพิ่มบรรทัดนี้
   headers: {
     "Content-Type": "application/json"
   },
@@ -154,3 +155,4 @@ await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc
 </body>
 
 </html>
+
