@@ -1,180 +1,215 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>เครื่องคิดเปอร์เซ็นต์</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f4f7fc;
-    padding: 30px;
-  }
-  .container {
-    max-width: 400px;
-    margin: auto;
-    background: #fff;
-    padding: 20px 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  }
-  h2 {
-    text-align: center;
-    color: #333;
-  }
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #bbb;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  button {
-    width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background: #4a8cff;
-    border: none;
-    color: white;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #346ed1;
-  }
-  #result {
-    margin-top: 25px;
-    font-size: 18px;
-    text-align: center;
-    color: #222;
-  }
-  .final-line {
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคิดเปอร์เซ็นต์โปร</title>
+    <style>
+        :root {
+            --primary: #4a8cff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --bg: #f0f2f5;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s, background 0.3s;
+        }
+        button:active { transform: scale(0.98); }
+        button:hover { background: #346ed1; }
+
+        #result {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed #eee;
+        }
+        .res-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .res-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .final-amount {
+            font-size: 24px;
+            color: var(--primary);
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .text-muted { color: #888; font-size: 14px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>คำนวณเปอร์เซ็นต์ (%)</h2>
+    <h2>📊 เครื่องคิดเปอร์เซ็นต์</h2>
 
-  <label>ยอดเงิน (บวก ลบ คูณ หาร ได้)</label>
-  <input type="text" id="amount" placeholder="เช่น 1000+500-200">
-<label>เลือกประเภท</label>
-<select id="type" onchange="setPercent()">
-  <option>กำลังโหลด...</option>
-</select>
-  <label>หักเปอร์เซ็นต์ (%)</label>
-  <input type="number" id="percent" placeholder="ใส่ % ที่ต้องการ">
+    <div class="input-group">
+        <label>ยอดเงิน (คำนวณได้ เช่น 1000+500)</label>
+        <input type="text" id="amount" placeholder="0.00" onkeyup="if(event.key==='Enter') calculate()">
+		
+    </div>
 
-  <label>% ที่จะได้รับกลับจริง</label>
-  <input type="number" id="receivePercent" placeholder="เช่น 86">
+    <div class="input-group">
+        <label>เลือกประเภทรายการ</label>
+        <select id="type" onchange="setPercent()">
+            <option>🔄 กำลังโหลดข้อมูล...</option>
+        </select>
+    </div>
 
-  <button onclick="calculate()">คำนวณ</button>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="input-group">
+            <label>หักออก (%)</label>
+            <input type="number" id="percent" placeholder="0">
+        </div>
+        <div class="input-group">
+            <label>รับคืน (%)</label>
+            <input type="number" id="receivePercent" placeholder="0">
+        </div>
+    </div>
 
-  <div id="result"></div>
+    <button onclick="calculate()">คำนวณและบันทึก</button>
+
+    <div id="result">
+        </div>
 </div>
 
 <script>
 let configData = [];
+const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
 
 async function loadTypes(){
-
-  const res = await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec");
-  const data = await res.json();
-
-  configData = data;
-
-  const select = document.getElementById("type");
-  select.innerHTML = '<option value="">--เลือกประเภท--</option>';
-
-  data.forEach((item,index)=>{
-    select.innerHTML += `<option value="${index}">${item.name}</option>`;
-  });
-
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        configData = data;
+        const select = document.getElementById("type");
+        select.innerHTML = '<option value="">-- เลือกประเภท --</option>';
+        data.forEach((item, index) => {
+            select.innerHTML += `<option value="${index}">${item.name}</option>`;
+        });
+    } catch (e) {
+        document.getElementById("type").innerHTML = '<option>⚠️ โหลดข้อมูลไม่สำเร็จ</option>';
+    }
 }
+
 function setPercent(){
-
-  const index = document.getElementById("type").value;
-
-  if(index === "") return;
-
-  const item = configData[index];
-
-  document.getElementById("percent").value = item.percent;
-  document.getElementById("receivePercent").value = item.receive;
-
+    const index = document.getElementById("type").value;
+    if(index === "") return;
+    const item = configData[index];
+    document.getElementById("percent").value = item.percent;
+    document.getElementById("receivePercent").value = item.receive;
 }
+
 async function calculate() {
+    const amountInput = document.getElementById("amount").value;
+    const percent = parseFloat(document.getElementById("percent").value) || 0;
+    const receivePercent = parseFloat(document.getElementById("receivePercent").value) || 0;
+    const resultDiv = document.getElementById("result");
 
-  let amountInput = document.getElementById("amount").value;
-  const percent = parseFloat(document.getElementById("percent").value);
-  const receivePercent = parseFloat(document.getElementById("receivePercent").value);
-  const resultDiv = document.getElementById("result");
+    try {
+        // ใช้ Function เพื่อคำนวณสมการคณิตศาสตร์ที่พิมพ์เข้ามา
+        const amount = Function('"use strict"; return (' + amountInput + ')')();
+        if (isNaN(amount)) throw "error";
 
-  try {
+        const discount = (amount * percent) / 100;
+        const netReturn = amount - discount;
+        const receiveActual = (amount * receivePercent) / 100;
 
-    const amount = Function('"use strict"; return (' + amountInput + ')')();
-    if (isNaN(amount)) throw "error";
+        resultDiv.innerHTML = `
+           <div class="res-card">
+        <div class="res-row"><span>ยอดรวมต้นทาง:</span> <b>${amount.toLocaleString()}</b></div>
+        <div class="res-row" style="color: #d9534f;"><span>หักออก (${percent}%):</span> <b>-${discount.toLocaleString()}</b></div>
+        
+        <div class="res-row math-summary">
+            <span>สมการสรุป:</span>
+            <span>${amount.toLocaleString()} - ${percent}% = <b style="color:#222">${netReturn.toLocaleString()}</b></span>
+        </div>
 
-    let resultText = "";
-    let finalValue = "";
-    let receiveAmount = "";
+        <div class="res-row" style="color: #28a745; margin-top:10px; border-top: 1px solid #eee; pt-10">
+            <span>ยอดรับจริง (${receivePercent}%):</span> <b>${receiveActual.toLocaleString()}</b>
+        </div>
+    </div>
+        `;
 
-    // 🔹 คำนวณแบบหัก %
-    if (!isNaN(percent)) {
-      const discount = (amount * percent) / 100;
-      finalValue = amount - discount;
+        // บันทึกลง Google Sheet
+        fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: amount,
+                percent: percent,
+                receivePercent: receivePercent,
+                final: netReturn,
+                receiveAmount: receiveActual
+            })
+        });
 
-      resultText += 
-        "ยอดรวมสแกน %: <b>" + amount.toLocaleString() + "</b><br>" +
-        "หัก: <b>" + discount.toLocaleString() + "</b><br>" +
-        "ยอดรับคืนสุทธิ: <b>" + finalValue.toLocaleString() + "</b><br>" +
-        "<hr>" +
-        "<div class='final-line'>" +
-        amount.toLocaleString() + " - " + percent + "% = " + finalValue.toLocaleString() +
-        "</div><hr>";
+    } catch {
+        resultDiv.innerHTML = "<div style='color:red; text-align:center;'>❌ รูปแบบตัวเลขไม่ถูกต้อง</div>";
     }
-
-    // 🔹 คำนวณจาก % ที่ได้รับกลับ
-    if (!isNaN(receivePercent)) {
-      receiveAmount = (amount * receivePercent) / 100;
-
-      resultText += 
-        "% ที่ได้รับกลับ: <b>" + receivePercent + "%</b><br>" +
-        "ยอดสุทธิที่ได้รับ: <b>" + receiveAmount.toLocaleString() + "</b>";
-    }
-
-    resultDiv.innerHTML = resultText;
-
-    // 🔥 ส่งเข้า Google Sheet
-    await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        amount: amount,
-        percent: percent,
-        receivePercent: receivePercent,
-        final: finalValue,
-        receiveAmount: receiveAmount
-      })
-    });
-
-  } catch {
-    resultDiv.innerText = "กรุณาใส่ตัวเลขหรือสมการให้ถูกต้อง";
-  }
 }
+
 window.onload = loadTypes;
 </script>
 
