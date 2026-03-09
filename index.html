@@ -134,85 +134,127 @@
 </div>
 
 <script>
+
 let configData = [];
+
 const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
 
 async function loadTypes(){
-    try {
-        const res = await fetch(API_URL);
+
+    try{
+
+        const res = await fetch(API_URL+"?t="+Date.now());
         const data = await res.json();
+
         configData = data;
+
         const select = document.getElementById("type");
+
         select.innerHTML = '<option value="">-- เลือกประเภท --</option>';
-        data.forEach((item, index) => {
+
+        data.forEach((item,index)=>{
+
             select.innerHTML += `<option value="${index}">${item.name}</option>`;
+
         });
-    } catch (e) {
-        document.getElementById("type").innerHTML = '<option>⚠️ โหลดข้อมูลไม่สำเร็จ</option>';
+
+    }catch(err){
+
+        document.getElementById("type").innerHTML =
+        '<option>⚠️ โหลดข้อมูลไม่สำเร็จ</option>';
+
     }
+
 }
+
 
 function setPercent(){
+
     const index = document.getElementById("type").value;
-    if(index === "") return;
+
+    if(index==="") return;
+
     const item = configData[index];
+
     document.getElementById("percent").value = item.percent;
+
     document.getElementById("receivePercent").value = item.receive;
+
 }
 
-async function calculate() {
-    const amountInput = document.getElementById("amount").value;
-    const percent = parseFloat(document.getElementById("percent").value) || 0;
-    const receivePercent = parseFloat(document.getElementById("receivePercent").value) || 0;
-    const resultDiv = document.getElementById("result");
 
-    try {
-        // ใช้ Function เพื่อคำนวณสมการคณิตศาสตร์ที่พิมพ์เข้ามา
-        const amount = Function('"use strict"; return (' + amountInput + ')')();
-        if (isNaN(amount)) throw "error";
+async function calculate(){
 
-        const discount = (amount * percent) / 100;
-        const netReturn = amount - discount;
-        const receiveActual = (amount * receivePercent) / 100;
+const amountInput = document.getElementById("amount").value;
 
-        resultDiv.innerHTML = `
-           <div class="res-card">
-        <div class="res-row"><span>ยอดรวมต้นทาง:</span> <b>${amount.toLocaleString()}</b></div>
-        <div class="res-row" style="color: #d9534f;"><span>หักออก (${percent}%):</span> <b>-${discount.toLocaleString()}</b></div>
-        
-        <div class="res-row math-summary">
-            <span>สมการสรุป:</span>
-            <span>${amount.toLocaleString()} - ${percent}% = <b style="color:#222">${netReturn.toLocaleString()}</b></span>
-        </div>
+const percent = parseFloat(document.getElementById("percent").value)||0;
 
-        <div class="res-row" style="color: #28a745; margin-top:10px; border-top: 1px solid #eee; pt-10">
-            <span>ยอดรับจริง (${receivePercent}%):</span> <b>${receiveActual.toLocaleString()}</b>
-        </div>
-    </div>
-        `;
+const receivePercent = parseFloat(document.getElementById("receivePercent").value)||0;
 
-        // บันทึกลง Google Sheet
-        fetch(API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                amount: amount,
-                percent: percent,
-                receivePercent: receivePercent,
-                final: netReturn,
-                receiveAmount: receiveActual
-            })
-        });
+const resultDiv = document.getElementById("result");
 
-    } catch {
-        resultDiv.innerHTML = "<div style='color:red; text-align:center;'>❌ รูปแบบตัวเลขไม่ถูกต้อง</div>";
-    }
+try{
+
+const amount = Function('"use strict";return ('+amountInput+')')();
+
+if(isNaN(amount)) throw "error";
+
+const discount = (amount*percent)/100;
+
+const netReturn = amount-discount;
+
+const receiveActual = (amount*receivePercent)/100;
+
+resultDiv.innerHTML=`
+
+<div class="res-card">
+
+<div class="res-row"><span>ยอดรวมต้นทาง:</span><b>${amount.toLocaleString()}</b></div>
+
+<div class="res-row" style="color:red;"><span>หัก (${percent}%):</span><b>- ${discount.toLocaleString()}</b></div>
+
+<div class="res-row"><span>หลังหัก:</span><b>${netReturn.toLocaleString()}</b></div>
+
+<div class="res-row" style="color:green;"><span>รับจริง (${receivePercent}%):</span><b>${receiveActual.toLocaleString()}</b></div>
+
+</div>
+`;
+
+fetch(API_URL,{
+
+method:"POST",
+
+mode:"no-cors",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+amount:amount,
+percent:percent,
+receivePercent:receivePercent,
+final:netReturn,
+receiveAmount:receiveActual
+
+})
+
+});
+
+}catch{
+
+resultDiv.innerHTML="<div style='color:red;text-align:center;'>❌ ตัวเลขผิด</div>";
+
 }
 
-window.onload = loadTypes;
+}
+
+window.onload=loadTypes;
+
 </script>
 
 </body>
 </html>
+
 
