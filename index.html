@@ -205,19 +205,20 @@ const netReturn = amount-discount;
 
 const receiveActual = (amount*receivePercent)/100;
 
-resultDiv.innerHTML=`
+resultDiv.innerHTML = `
+    <div class="res-card">
+        <div class="res-row"><span>ยอดรวมต้นทาง:</span> <b>${amount.toLocaleString()}</b></div>
+        <div class="res-row" style="color: #d9534f;"><span>หักออก (${percent}%):</span> <b>-${discount.toLocaleString()}</b></div>
+        
+        <div class="res-row math-summary">
+            <span>สมการสรุป:</span>
+            <span>${amount.toLocaleString()} - ${percent}% = <b style="color:#222">${netReturn.toLocaleString()}</b></span>
+        </div>
 
-<div class="res-card">
-
-<div class="res-row"><span>ยอดรวมต้นทาง:</span><b>${amount.toLocaleString()}</b></div>
-
-<div class="res-row" style="color:red;"><span>หัก (${percent}%):</span><b>- ${discount.toLocaleString()}</b></div>
-
-<div class="res-row"><span>หลังหัก:</span><b>${netReturn.toLocaleString()}</b></div>
-
-<div class="res-row" style="color:green;"><span>รับจริง (${receivePercent}%):</span><b>${receiveActual.toLocaleString()}</b></div>
-
-</div>
+        <div class="res-row" style="color: #28a745; margin-top:10px; border-top: 1px solid #eee; pt-10">
+            <span>ยอดรับจริง (${receivePercent}%):</span> <b>${receiveActual.toLocaleString()}</b>
+        </div>
+    </div> 
 `;
 
 fetch(API_URL,{
@@ -256,5 +257,6 @@ window.onload=loadTypes;
 
 </body>
 </html>
+
 
 
