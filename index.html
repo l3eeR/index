@@ -68,7 +68,10 @@
 
   <label>ยอดเงิน (บวก ลบ คูณ หาร ได้)</label>
   <input type="text" id="amount" placeholder="เช่น 1000+500-200">
-
+<label>เลือกประเภท</label>
+<select id="type" onchange="setPercent()">
+  <option>กำลังโหลด...</option>
+</select>
   <label>หักเปอร์เซ็นต์ (%)</label>
   <input type="number" id="percent" placeholder="ใส่ % ที่ต้องการ">
 
@@ -81,6 +84,35 @@
 </div>
 
 <script>
+let configData = [];
+
+async function loadTypes(){
+
+  const res = await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec");
+  const data = await res.json();
+
+  configData = data;
+
+  const select = document.getElementById("type");
+  select.innerHTML = '<option value="">--เลือกประเภท--</option>';
+
+  data.forEach((item,index)=>{
+    select.innerHTML += `<option value="${index}">${item.name}</option>`;
+  });
+
+}
+function setPercent(){
+
+  const index = document.getElementById("type").value;
+
+  if(index === "") return;
+
+  const item = configData[index];
+
+  document.getElementById("percent").value = item.percent;
+  document.getElementById("receivePercent").value = item.receive;
+
+}
 async function calculate() {
 
   let amountInput = document.getElementById("amount").value;
@@ -123,36 +155,28 @@ async function calculate() {
 
     resultDiv.innerHTML = resultText;
 
-  // 🔥 ส่งเข้า Google Sheet
-try {
-  await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify({
-      amount: amount,
-      percent: percent,
-      receivePercent: receivePercent,
-      final: finalValue,
-      receiveAmount: receiveAmount
-    })
-  });
-
-  console.log("ส่งข้อมูลเรียบร้อย");
-} catch (err) {
-  console.error("เกิดข้อผิดพลาด:", err);
-}
+    // 🔥 ส่งเข้า Google Sheet
+    await fetch("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount: amount,
+        percent: percent,
+        receivePercent: receivePercent,
+        final: finalValue,
+        receiveAmount: receiveAmount
+      })
+    });
 
   } catch {
     resultDiv.innerText = "กรุณาใส่ตัวเลขหรือสมการให้ถูกต้อง";
   }
 }
+window.onload = loadTypes;
 </script>
 
 </body>
-
 </html>
-
-
-
