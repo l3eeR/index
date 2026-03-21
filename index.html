@@ -18,19 +18,20 @@ margin:0;
 .card{
 background:white;
 padding:25px;
-border-radius:14px;
+border-radius:16px;
 width:380px;
-box-shadow:0 10px 25px rgba(0,0,0,0.15);
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
 }
 
 h2{text-align:center;margin-bottom:20px;}
 
 input{
 width:100%;
-padding:10px;
+padding:12px;
 margin:6px 0;
-border-radius:8px;
+border-radius:10px;
 border:1px solid #ccc;
+font-size:15px;
 }
 
 button{
@@ -41,7 +42,7 @@ border:none;
 background:#4a7cff;
 color:white;
 font-size:16px;
-border-radius:8px;
+border-radius:10px;
 cursor:pointer;
 }
 
@@ -51,19 +52,28 @@ background:#28a745;
 
 .result{
 margin-top:15px;
-padding:12px;
+padding:15px;
 background:#f7f7f7;
-border-radius:10px;
-line-height:1.6;
+border-radius:12px;
+line-height:1.7;
+font-size:14px;
 }
 
 .summary{
 margin-top:10px;
-padding:10px;
+padding:12px;
 background:#eaf1ff;
-border-radius:8px;
+border-radius:10px;
 font-weight:bold;
 text-align:center;
+font-size:18px;
+}
+
+.success{
+color:green;
+margin-top:10px;
+text-align:center;
+font-size:14px;
 }
 </style>
 </head>
@@ -99,53 +109,55 @@ const percent = parseFloat(document.getElementById("percent").value)||0;
 const receivePercent = parseFloat(document.getElementById("receivePercent").value)||0;
 const pendingPercent = parseFloat(document.getElementById("pendingPercent").value)||0;
 
-const resultDiv=document.getElementById("result");
+const resultDiv = document.getElementById("result");
 
 try{
 
 const amount = Function('"use strict";return ('+amountInput+')')();
 if(isNaN(amount)) throw "error";
 
-// 🔹 คำนวณ
-const discount = (amount*percent)/100;
+// 🔹 คำนวณหลัก
+const discount = (amount * percent) / 100;
 const netAfterDiscount = amount - discount;
 
-const receive = (amount*receivePercent)/100;
+const receive = (amount * receivePercent) / 100;
 
-// ✅ รอโอนแบบใหม่ (ยอดที่ลูกค้าจะได้)
-const pendingNet = amount - (amount*pendingPercent)/100;
+// 🔹 รอโอน (แยกคิดจากยอดเต็ม)
+const pendingNet = amount - (amount * pendingPercent) / 100;
 
-// 🔹 summary
-const summary = `${amount.toLocaleString()} - ${percent}% = ${netAfterDiscount.toLocaleString()}`;
-const pendingSummary = `${amount.toLocaleString()} - ${pendingPercent}% = ${pendingNet.toLocaleString()}`;
+// 🔹 summary (โชว์ลูกค้า)
+const summary = `${amount.toLocaleString()} - ${percent}% = ${netAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 
-// 🔹 ข้อความสำหรับ copy
-lastText = `
-ยอด: ${amount.toLocaleString()}
-หัก ${percent}% = ${discount.toLocaleString()}
-หลังหัก = ${netAfterDiscount.toLocaleString()}
-เราได้ ${receivePercent}% = ${receive.toLocaleString()}
-รอโอน = ${pendingSummary}
-`;
+// 🔹 รอโอน summary
+const pendingSummary = `${amount.toLocaleString()} - ${pendingPercent}% = ${pendingNet.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+
+// 🔹 copy (เอาแค่บรรทัดเดียว)
+lastText = summary;
 
 // 🔹 แสดงผล
-resultDiv.innerHTML=`
+resultDiv.innerHTML = `
 <div>ยอดรวม: <b>${amount.toLocaleString()}</b></div>
 
-<div style="color:red;">หัก ${percent}% : -${discount.toLocaleString()}</div>
+<div style="color:red;">
+หัก ${percent}% : -${discount.toLocaleString()}
+</div>
 
 <div>หลังหัก: <b>${netAfterDiscount.toLocaleString()}</b></div>
 
-<div style="color:green;">เราได้ ${receivePercent}% : ${receive.toLocaleString()}</div>
+<div style="color:green;">
+เราได้ ${receivePercent}% : ${receive.toLocaleString()}
+</div>
 
 <div style="color:orange;">
 รอโอน: <b>${pendingSummary}</b>
 </div>
 
 <div class="summary">${summary}</div>
+
+<div class="success">✅ บันทึกข้อมูลแล้ว</div>
 `;
 
-// 🔥 ส่งเข้า Sheet
+// 🔥 ส่งเข้า Google Sheet
 fetch(API_URL,{
 method:"POST",
 mode:"no-cors",
@@ -165,6 +177,7 @@ final:netAfterDiscount
 }catch{
 resultDiv.innerHTML="❌ ใส่ตัวเลขไม่ถูกต้อง";
 }
+
 }
 
 // 📋 copy
