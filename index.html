@@ -1,192 +1,122 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>เครื่องคิดเปอร์เซ็นต์ PRO</title>
-
-<style>
-body{
-font-family:sans-serif;
-background:#f2f2f2;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
-
-.card{
-background:white;
-padding:25px;
-border-radius:16px;
-width:380px;
-box-shadow:0 10px 30px rgba(0,0,0,0.15);
-}
-
-h2{text-align:center;margin-bottom:20px;}
-
-input{
-width:100%;
-padding:12px;
-margin:6px 0;
-border-radius:10px;
-border:1px solid #ccc;
-font-size:15px;
-}
-
-button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-background:#4a7cff;
-color:white;
-font-size:16px;
-border-radius:10px;
-cursor:pointer;
-}
-
-.copy-btn{
-background:#28a745;
-}
-
-.result{
-margin-top:15px;
-padding:15px;
-background:#f7f7f7;
-border-radius:12px;
-line-height:1.7;
-font-size:14px;
-}
-
-.summary{
-margin-top:10px;
-padding:12px;
-background:#eaf1ff;
-border-radius:10px;
-font-weight:bold;
-text-align:center;
-font-size:18px;
-}
-
-.success{
-color:green;
-margin-top:10px;
-text-align:center;
-font-size:14px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคิดเปอร์เซ็นต์ PRO v2</title>
+    <style>
+        :root { --primary: #4a7cff; --success: #28a745; --orange: #fd7e14; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        button { padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-calc { background: var(--primary); color: white; grid-column: span 2; }
+        .btn-copy { background: var(--success); color: white; }
+        .btn-clear { background: #eee; color: #666; }
+        button:active { transform: scale(0.98); }
+        .result-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px; font-size: 14px; display: none; }
+        .summary-display { background: #eaf1ff; padding: 15px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 15px; border: 1px solid #cce0ff; }
+        .toast { position: fixed; bottom: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; display: none; }
+    </style>
 </head>
-
 <body>
 
 <div class="card">
+    <h2>📊 คิดเปอร์เซ็นต์ PRO</h2>
+    
+    <div class="input-group">
+        <label>ยอดเงิน (คำนวณได้)</label>
+        <input id="amount" type="text" placeholder="เช่น 1707 หรือ 1000+707">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group">
+            <label>หักออก (%)</label>
+            <input id="percent" type="number" value="">
+        </div>
+        <div class="input-group">
+            <label>เราได้ (%)</label>
+            <input id="receivePercent" type="number" value="">
+        </div>
+    </div>
+    <div class="input-group">
+        <label>% รอร้านโอนกลับ</label>
+        <input id="pendingPercent" type="number" value="">
+    </div>
 
-<h2>📊 เครื่องคิดเปอร์เซ็นต์</h2>
+    <button class="btn-calc" onclick="calculate()">คำนวณ + บันทึกลง Sheet</button>
+    <div class="btn-group">
+        <button class="btn-copy" onclick="copyToClipboard()">📋 คัดลอกสรุป</button>
+        <button class="btn-clear" onclick="location.reload()">ล้างค่า</button>
+    </div>
 
-<input id="amount" placeholder="ยอดเงิน เช่น 1000+500">
-<input id="percent" placeholder="หัก (%)">
-<input id="receivePercent" placeholder="เราได้ (%)">
-<input id="pendingPercent" placeholder="% รอร้านโอนกลับ">
-
-<button onclick="calculate()">คำนวณ + บันทึก</button>
-<button class="copy-btn" onclick="copyResult()">📋 Copy ส่งลูกค้า</button>
-
-<div class="result" id="result"></div>
-
+    <div id="resultBox" class="result-box"></div>
+    <div id="summaryDisplay" class="summary-display" style="display:none;"></div>
 </div>
+
+<div id="toast" class="toast">คัดลอกลงคลิปบอร์ดแล้ว!</div>
 
 <script>
-
 const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
+let copyText = "";
 
-let lastText = "";
+async function calculate() {
+    const amountInput = document.getElementById("amount").value;
+    const p = parseFloat(document.getElementById("percent").value) || 0;
+    const rp = parseFloat(document.getElementById("receivePercent").value) || 0;
+    const pp = parseFloat(document.getElementById("pendingPercent").value) || 0;
 
-async function calculate(){
+    try {
+        const amount = Function('"use strict"; return (' + amountInput + ')')();
+        if (isNaN(amount)) throw "error";
 
-const amountInput = document.getElementById("amount").value;
-const percent = parseFloat(document.getElementById("percent").value)||0;
-const receivePercent = parseFloat(document.getElementById("receivePercent").value)||0;
-const pendingPercent = parseFloat(document.getElementById("pendingPercent").value)||0;
+        const discount = (amount * p) / 100;
+        const netAfterDiscount = amount - discount;
+        const receive = (amount * rp) / 100;
+        const pendingNet = amount - (amount * pp) / 100;
 
-const resultDiv = document.getElementById("result");
+        const summary = `${amount.toLocaleString()} - ${p}% = ${netAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+        copyText = summary; // เก็บค่าไว้รอคัดลอก
 
-try{
+        document.getElementById("resultBox").style.display = "block";
+        document.getElementById("resultBox").innerHTML = `
+            <div style="display:flex; justify-content:space-between"><span>ยอดรวม:</span> <b>${amount.toLocaleString()}</b></div>
+            <div style="display:flex; justify-content:space-between; color:red"><span>หัก ${p}%:</span> <b>-${discount.toLocaleString()}</b></div>
+            <div style="display:flex; justify-content:space-between; color:green"><span>เราได้ ${rp}%:</span> <b>${receive.toLocaleString()}</b></div>
+            <div style="display:flex; justify-content:space-between; color:orange; border-top:1px dashed #ccc; margin-top:5px; padding-top:5px;">
+                <span>รอโอน (${pp}%):</span> <b>${pendingNet.toLocaleString()}</b>
+            </div>
+        `;
 
-const amount = Function('"use strict";return ('+amountInput+')')();
-if(isNaN(amount)) throw "error";
+        document.getElementById("summaryDisplay").style.display = "block";
+        document.getElementById("summaryDisplay").innerText = summary;
 
-// 🔹 คำนวณหลัก
-const discount = (amount * percent) / 100;
-const netAfterDiscount = amount - discount;
+        // ส่งข้อมูลไป Google Sheet
+        fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                amount, percent: p, receivePercent: rp, pendingPercent: pp,
+                final: netAfterDiscount, pendingNet, receiveAmount: receive
+            })
+        });
 
-const receive = (amount * receivePercent) / 100;
-
-// 🔹 รอโอน (แยกคิดจากยอดเต็ม)
-const pendingNet = amount - (amount * pendingPercent) / 100;
-
-// 🔹 summary (โชว์ลูกค้า)
-const summary = `${amount.toLocaleString()} - ${percent}% = ${netAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-
-// 🔹 รอโอน summary
-const pendingSummary = `${amount.toLocaleString()} - ${pendingPercent}% = ${pendingNet.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-
-// 🔹 copy (เอาแค่บรรทัดเดียว)
-lastText = summary;
-
-// 🔹 แสดงผล
-resultDiv.innerHTML = `
-<div>ยอดรวม: <b>${amount.toLocaleString()}</b></div>
-
-<div style="color:red;">
-หัก ${percent}% : -${discount.toLocaleString()}
-</div>
-
-<div>หลังหัก: <b>${netAfterDiscount.toLocaleString()}</b></div>
-
-<div style="color:green;">
-เราได้ ${receivePercent}% : ${receive.toLocaleString()}
-</div>
-
-<div style="color:orange;">
-รอโอน: <b>${pendingSummary}</b>
-</div>
-
-<div class="summary">${summary}</div>
-
-<div class="success">✅ บันทึกข้อมูลแล้ว</div>
-`;
-
-// 🔥 ส่งเข้า Google Sheet
-fetch(API_URL,{
-method:"POST",
-mode:"no-cors",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({
-amount,
-percent,
-receivePercent,
-pendingPercent,
-discount,
-receiveAmount:receive,
-pendingNet,
-final:netAfterDiscount
-})
-});
-
-}catch{
-resultDiv.innerHTML="❌ ใส่ตัวเลขไม่ถูกต้อง";
+    } catch(e) {
+        alert("กรุณาตรวจสอบการกรอกตัวเลข");
+    }
 }
 
+function copyToClipboard() {
+    if (!copyText) return alert("กรุณากดคำนวณก่อน");
+    navigator.clipboard.writeText(copyText);
+    const toast = document.getElementById("toast");
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 2000);
 }
-
-// 📋 copy
-function copyResult(){
-if(!lastText) return alert("ยังไม่มีข้อมูล");
-navigator.clipboard.writeText(lastText);
-alert("คัดลอกแล้ว!");
-}
-
 </script>
 
 </body>
