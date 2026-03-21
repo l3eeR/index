@@ -71,42 +71,58 @@ async function calculate() {
     const pp = parseFloat(document.getElementById("pendingPercent").value) || 0;
 
     try {
+        // คำนวณยอดเงินต้นทาง
         const amount = Function('"use strict"; return (' + amountInput + ')')();
         if (isNaN(amount)) throw "error";
 
+        // 1. คำนวณยอดหักออก และยอดหลังหัก
         const discount = (amount * p) / 100;
         const netAfterDiscount = amount - discount;
+
+        // 2. คำนวณกำไรที่เราได้รับ
         const receive = (amount * rp) / 100;
-        const pendingNet = amount - (amount * pp) / 100;
 
-        const summary = `${amount.toLocaleString()} - ${p}% = ${netAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-        copyText = summary; // เก็บค่าไว้รอคัดลอก
+        // 3. ปรับใหม่: คำนวณ "ยอดเงินที่รอโอน" (ยอดที่โดนกักไว้)
+        // ถ้าใส่ pp = 0 ผลลัพธ์จะเป็น 0 ทันที
+        const pendingAmount = (amount * pp) / 100; 
 
+        // สร้างข้อความสรุปสำหรับ Copy
+        const summary = `${amount.toLocaleString()} - ${p}% = ${netAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        copyText = summary;
+
+        // แสดงผลบนหน้าเว็บ
         document.getElementById("resultBox").style.display = "block";
         document.getElementById("resultBox").innerHTML = `
             <div style="display:flex; justify-content:space-between"><span>ยอดรวม:</span> <b>${amount.toLocaleString()}</b></div>
             <div style="display:flex; justify-content:space-between; color:red"><span>หัก ${p}%:</span> <b>-${discount.toLocaleString()}</b></div>
             <div style="display:flex; justify-content:space-between; color:green"><span>เราได้ ${rp}%:</span> <b>${receive.toLocaleString()}</b></div>
             <div style="display:flex; justify-content:space-between; color:orange; border-top:1px dashed #ccc; margin-top:5px; padding-top:5px;">
-                <span>รอโอน (${pp}%):</span> <b>${pendingNet.toLocaleString()}</b>
+                <span>ยอดเงินที่รอโอน (${pp}%):</span> <b>${pendingAmount.toLocaleString()}</b>
             </div>
         `;
 
         document.getElementById("summaryDisplay").style.display = "block";
         document.getElementById("summaryDisplay").innerText = summary;
 
-        // ส่งข้อมูลไป Google Sheet
+        // ส่งข้อมูลไป Google Sheet (ใช้ฟอร์แมตที่ลดปัญหา CORS)
         fetch(API_URL, {
             method: "POST",
             mode: "no-cors",
+            cache: "no-cache",
+            headers: { "Content-Type": "text/plain" }, // ใช้ text/plain เพื่อเลี่ยง Preflight request
             body: JSON.stringify({
-                amount, percent: p, receivePercent: rp, pendingPercent: pp,
-                final: netAfterDiscount, pendingNet, receiveAmount: receive
+                amount: amount,
+                percent: p,
+                receivePercent: rp,
+                pendingPercent: pp,
+                final: netAfterDiscount,
+                pendingNet: pendingAmount, // ส่งยอดที่โดนกักไปบันทึก
+                receiveAmount: receive
             })
         });
 
     } catch(e) {
-        alert("กรุณาตรวจสอบการกรอกตัวเลข");
+        alert("กรุณาตรวจสอบการกรอกยอดเงิน (เช่น 1707 หรือ 1000+707)");
     }
 }
 
