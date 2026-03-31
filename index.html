@@ -33,8 +33,8 @@
 
     .form-group { margin-bottom: 18px; }
     label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #555; }
-    input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; transition: border-color 0.3s; }
-    input:focus, select:focus { border-color: var(--accent); }
+    input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; transition: border-color 0.3s; }
+    input:focus { border-color: var(--accent); }
     input[type="number"]::-webkit-inner-spin-button, 
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -66,6 +66,8 @@
     .history-clear-btn { float: right; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
 
     #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 1000; font-size: 14px; }
+
+    .summary-today { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; font-size: 18px; font-weight: bold; color: var(--success); border: 1px solid #c8e6c9; }
   </style>
 </head>
 <body>
@@ -77,13 +79,6 @@
     <div class="form-group">
       <label for="amount">ยอดเงิน (รองรับสูตร เช่น 1000+702)</label>
       <input type="text" id="amount" placeholder="ใส่ยอดเงิน" value="" onkeyup="if(event.keyCode === 13) calculateAndSave()">
-    </div>
-
-    <div class="form-group">
-      <label for="itemType">ประเภทรายการ</label>
-      <select id="itemType">
-        <option value="--กำหนดเอง--">--กำหนดเอง--</option>
-      </select>
     </div>
 
     <div class="grid-2">
@@ -133,6 +128,10 @@
       <button class="copy-btn" onclick="copyResult()">คัดลอก</button>
     </div>
 
+    <div class="summary-today">
+      เราได้จริงๆวันนี้: <span id="actualReceivedToday">0</span> บาท
+    </div>
+
     <div class="history-section">
       <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--primary);">ประวัติการคำนวณ <button class="history-clear-btn" onclick="clearHistory()">ล้างประวัติ</button></h3>
       <div id="historyList"></div>
@@ -147,9 +146,10 @@
   const API_URL = ""; // <<<<<<< ใส่ Web App URL ที่ได้จากการ Deploy ตรงนี้
 
   document.addEventListener('DOMContentLoaded', () => {
-    loadConfig();
+    // loadConfig(); // Removed as per user request
     loadHistory();
     checkApiStatus();
+    loadDailySummary(); // Load daily summary on page load
   });
 
   async function checkApiStatus() {
@@ -161,7 +161,7 @@
       return;
     }
     try {
-      const response = await fetch(API_URL + '?action=getConfig', { mode: 'cors' });
+      const response = await fetch(API_URL + '?action=getSummary', { mode: 'cors' }); // Changed to getSummary to check API
       if (response.ok) {
         statusBadge.textContent = 'ออนไลน์';
         statusBadge.classList.remove('status-offline');
@@ -175,31 +175,6 @@
       statusBadge.textContent = 'ออฟไลน์';
       statusBadge.classList.remove('status-online');
       statusBadge.classList.add('status-offline');
-    }
-  }
-
-  async function loadConfig() {
-    if (!API_URL) return;
-    try {
-      const response = await fetch(API_URL + '?action=getConfig', { mode: 'cors' });
-      const json = await response.json();
-      if (json.status === 'success' && json.data) {
-        const itemTypeSelect = document.getElementById('itemType');
-        json.data.forEach(item => {
-          const option = document.createElement('option');
-          option.value = `${item.percent},${item.receive}`;
-          option.textContent = `${item.name} (หัก ${item.percent}%, รับ ${item.receive}%)`;
-          itemTypeSelect.appendChild(option);
-        });
-        itemTypeSelect.addEventListener('change', (event) => {
-          const [percent, receive] = event.target.value.split(',').map(Number);
-          if (!isNaN(percent)) document.getElementById('deductPercent').value = percent;
-          if (!isNaN(receive)) document.getElementById('receivePercent').value = receive;
-        });
-      }
-    } catch (error) {
-      console.error('Error loading config:', error);
-      showToast('โหลดประเภทรายการไม่สำเร็จ');
     }
   }
 
@@ -243,12 +218,10 @@
     const receivedAmount = Math.round(amount * (receivePercent / 100));
     const todayReceived = Math.round(totalAmount - deductedAmount + receivedAmount); // เราได้วันนี้
     
-    let pendingNet = todayReceived; // Default to todayReceived
+    let pendingNet = 0; // Default to 0 if pendingPercent is 0
     if (pendingPercent > 0) {
       pendingNet = Math.round(todayReceived - (amount * (pendingPercent / 100)));
-    } else if (pendingPercent === 0) {
-      pendingNet = todayReceived; // ถ้า 0% รอโอน ก็คือยอดที่เราได้วันนี้
-    }
+    } 
 
     // Display results
     document.getElementById('totalAmount').textContent = formatNumber(totalAmount);
@@ -270,7 +243,7 @@
         pendingPercent: pendingPercent,
         final: todayReceived, // ยอดหลังหัก (เราได้วันนี้)
         pendingNet: pendingNet, // ยอดหลังหักรอโอน
-        note: document.getElementById('itemType').selectedOptions[0].textContent // ใช้ชื่อประเภทรายการเป็นหมายเหตุ
+        note: "-" // ไม่มีประเภทรายการแล้ว
       };
 
       const response = await fetch(API_URL, {
@@ -279,10 +252,10 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      // เนื่องจาก mode: 'no-cors' ทำให้ไม่สามารถเช็ค response.ok ได้โดยตรง
-      // เราจะถือว่าสำเร็จถ้าไม่มี error จาก fetch
+      
       showToast("บันทึกสำเร็จ ✓ (ข้อมูลกำลังส่งไปยัง Sheet)");
       saveToHistory(payload, todayReceived, pendingNet);
+      loadDailySummary(); // Reload daily summary after saving
     } catch (e) {
       console.error(e);
       showToast("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
@@ -297,7 +270,6 @@
     document.getElementById('deductPercent').value = '10';
     document.getElementById('receivePercent').value = '10';
     document.getElementById('pendingPercent').value = '0';
-    document.getElementById('itemType').value = '--กำหนดเอง--';
 
     document.getElementById('totalAmount').textContent = '0';
     document.getElementById('deductDisplay').textContent = '0';
@@ -308,6 +280,7 @@
     document.getElementById('pendingDisplay').textContent = '0';
     document.getElementById('pendingNet').textContent = '0';
     document.getElementById('finalResultDisplay').textContent = '0';
+    document.getElementById('actualReceivedToday').textContent = '0';
     document.getElementById('amount').focus();
   }
 
@@ -391,7 +364,6 @@
     document.getElementById('deductPercent').value = item.deductPercent;
     document.getElementById('receivePercent').value = item.receivePercent;
     document.getElementById('pendingPercent').value = item.pendingPercent;
-    // Note: itemType dropdown might not match exactly, so we don't set it directly
     calculateAndSave();
   }
 
@@ -400,6 +372,30 @@
       localStorage.removeItem('percentageHistory');
       loadHistory();
       showToast('ล้างประวัติแล้ว');
+    }
+  }
+
+  async function loadDailySummary() {
+    if (!API_URL) return;
+    try {
+      const response = await fetch(API_URL + '?action=getSummary', { mode: 'cors' });
+      const json = await response.json();
+      if (json.status === 'success' && json.data) {
+        const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const todayData = json.data.find(item => {
+          const itemDate = new Date(item.date).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          return itemDate === today;
+        });
+
+        let actualReceivedToday = 0;
+        if (todayData) {
+          actualReceivedToday = Math.round(todayData.todayReceived - todayData.pendingNet);
+        }
+        document.getElementById('actualReceivedToday').textContent = formatNumber(actualReceivedToday);
+      }
+    } catch (error) {
+      console.error('Error loading daily summary:', error);
+      // showToast('โหลดสรุปยอดวันนี้ไม่สำเร็จ'); // Suppress toast for this for cleaner UI
     }
   }
 </script>
