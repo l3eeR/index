@@ -3,85 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบคำนวณกำไร & ยอดโอนลูกค้า (Full Version)</title>
+  <title>ระบบคิดเงิน & บันทึกกำไร</title>
   <style>
     :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f8f9fa; }
-    body { font-family: 'Sarabun', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
-    .container { max-width: 450px; margin: auto; }
-    .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: var(--primary); margin-bottom: 25px; font-size: 20px; }
-    
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #666; }
-    input { width: 100%; padding: 14px; border: 1.5px solid #eee; border-radius: 12px; font-size: 18px; box-sizing: border-box; transition: 0.3s; }
-    input:focus { border-color: var(--accent); outline: none; background: #fff; }
-    
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .btn-main { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; background: var(--accent); color: white; margin-top: 15px; transition: 0.2s; }
-    .btn-main:active { transform: scale(0.98); }
-    .btn-main:disabled { background: #ccc; }
-
-    .result-section { background: #fdfdfd; padding: 20px; border-radius: 18px; margin-top: 20px; border: 1px solid #f0f0f0; }
-    .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
-    .row span:last-child { font-weight: bold; }
-    
-    .profit-box { text-align: center; margin: 15px 0; padding: 15px; background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; }
-    .profit-label { font-size: 14px; color: #27ae60; font-weight: bold; }
-    .profit-value { font-size: 32px; color: #1e8449; font-weight: bold; display: block; }
-
-    .copy-box { display: flex; align-items: center; background: #eef7ff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #d6eaff; }
-    #copyTarget { flex: 1; font-weight: bold; color: var(--accent); font-size: 18px; text-align: center; }
-    .btn-copy { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-left: 10px; }
+    body { font-family: 'Sarabun', sans-serif; background: var(--bg); padding: 15px; margin: 0; display: flex; justify-content: center; }
+    .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    h2 { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 18px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #666; }
+    input { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-main { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; background: var(--accent); color: white; transition: 0.2s; margin-bottom: 15px; }
+    .result-section { background: #fdfdfd; padding: 15px; border-radius: 15px; border: 1px solid #f0f0f0; }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .row b { color: var(--danger); }
+    .profit-box { text-align: center; margin: 10px 0; padding: 12px; background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; }
+    .profit-value { font-size: 28px; color: #1e8449; font-weight: bold; display: block; }
+    .copy-area { display: flex; align-items: center; background: #eef7ff; padding: 10px; border-radius: 10px; margin-top: 10px; }
+    #copyTarget { flex: 1; font-weight: bold; color: var(--accent); text-align: center; }
+    .btn-copy { background: #34495e; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    .percent-badge { background: #fff9db; padding: 5px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 13px; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card">
-    <h2>🏦 ระบบคิดเงิน & บันทึกกำไร</h2>
+<div class="card">
+  <h2>🏢 ระบบคิดเงิน & บันทึกกำไร</h2>
+  
+  <label>ยอดเงินต้น (รองรับ 1000+180)</label>
+  <input type="text" id="amount" placeholder="0" inputmode="decimal">
+
+  <div class="grid">
+    <div>
+      <label>หักลูกค้า (%)</label>
+      <input type="number" id="p_cust" value="25">
+    </div>
+    <div>
+      <label>ร้านหักเรา (%)</label>
+      <input type="number" id="p_shop" value="15">
+    </div>
+  </div>
+
+  <button class="btn-main" id="saveBtn" onclick="calculateAndSave()">คำนวณและบันทึก</button>
+
+  <div class="result-section">
+    <div class="row"><span>หักลูกค้า:</span> <span id="v_cust_val">0</span></div>
+    <div class="row"><span>ร้านหักเรา:</span> <span id="v_shop_val">0</span></div>
     
-    <div class="form-group">
-      <label>ยอดเงินต้น (เช่น 1180 หรือ 1000+180)</label>
-      <input type="text" id="amount" placeholder="ใส่ยอดเงินที่นี่" inputmode="decimal">
+    <div class="percent-badge">
+      <span>เปอร์เซ็นต์ที่เราได้:</span>
+      <b id="v_my_percent" style="color:var(--success)">0%</b>
     </div>
 
-    <div class="grid">
-      <div class="form-group">
-        <label>หักลูกค้า (%)</label>
-        <input type="number" id="p_cust" value="25">
-      </div>
-      <div class="form-group">
-        <label>ร้านหักเรา (%)</label>
-        <input type="number" id="p_shop" value="15">
-      </div>
+    <div class="profit-box">
+      <span style="font-size: 12px; color: #27ae60; font-weight: bold;">กำไรสุทธิที่เราได้จริง</span>
+      <span class="profit-value" id="v_my_profit">0 บาท</span>
     </div>
 
-    <button class="btn-main" id="saveBtn" onclick="calculateAndSave()">คำนวณและบันทึก</button>
-
-    <div class="result-section">
-      <div class="row"><span>หักลูกค้า:</span> <span id="v_cust_val" style="color:var(--danger)">0</span></div>
-      <div class="row"><span>ร้านหักเรา:</span> <span id="v_shop_val">0</span></div>
-      <div class="row" style="background: #fff9db; padding: 10px; border-radius: 8px;">
-        <span>เปอร์เซ็นต์ที่เราได้:</span> 
-        <span id="v_my_percent" style="color:var(--success)">0%</span>
-      </div>
-      
-      <div class="profit-box">
-        <span class="profit-label">กำไรสุทธิที่เราได้จริง</span>
-        <span class="profit-value" id="v_my_profit">0 บาท</span>
-      </div>
-
-      <div class="row" style="border:none"><span>ยอดโอนให้ลูกค้า:</span></div>
-      <div class="copy-box">
-        <span id="copyTarget">---</span>
-        <button class="btn-copy" onclick="copyResult()">คัดลอก</button>
-      </div>
+    <div class="copy-area">
+      <span id="copyTarget">---</span>
+      <button class="btn-copy" onclick="copyResult()">คัดลอก</button>
     </div>
   </div>
 </div>
 
 <script>
-  // URL จาก Google Apps Script ของคุณ
+  // วาง URL ของคุณที่นี่
   const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
 
   function calculateAndSave() {
@@ -89,30 +75,25 @@
     const rawInput = document.getElementById('amount').value;
 
     try {
-      // 1. คำนวณค่าพื้นฐาน
-      let amt = eval(rawInput.replace(/[^0-9+\-*/.]/g, '')); // รองรับการบวกเลข
+      let amt = eval(rawInput.replace(/[^0-9+\-*/.]/g, ''));
       let pCust = Number(document.getElementById('p_cust').value);
       let pShop = Number(document.getElementById('p_shop').value);
 
-      // ยอดหักลูกค้า และยอดที่จะโอนให้ลูกค้า
       let valCustDeduct = Math.round(amt * (pCust / 100));
       let toCustomer = amt - valCustDeduct;
-
-      // ส่วนต่างกำไร (%) และ กำไรสุทธิ (บาท)
       let pProfit = pCust - pShop;
-      let valProfit = Math.round(amt * (pProfit / 100));
+      let valProfit = Math.round(amt * (pProfit / 100)); // กำไรเป็นบาท
 
-      // 2. อัปเดตการแสดงผลหน้าเว็บ
-      document.getElementById('v_cust_val').innerText = "-" + valCustDeduct.toLocaleString() + " (" + pCust + "%)";
+      // อัปเดต UI
+      document.getElementById('v_cust_val').innerHTML = `<b>-${valCustDeduct.toLocaleString()} (${pCust}%)</b>`;
       document.getElementById('v_shop_val').innerText = pShop + "%";
       document.getElementById('v_my_percent').innerText = pProfit + "%";
       document.getElementById('v_my_profit').innerText = valProfit.toLocaleString() + " บาท";
       
-      // ข้อความสำหรับคัดลอก (ส่งให้ลูกค้า)
       const copyStr = `${amt}-${pCust}%=${toCustomer}`;
       document.getElementById('copyTarget').innerText = copyStr;
 
-      // 3. ส่งข้อมูลไปบันทึกใน Google Sheet
+      // บันทึกลง Google Sheet
       btn.disabled = true;
       btn.innerText = "กำลังบันทึก...";
 
@@ -122,32 +103,28 @@
         body: JSON.stringify({
           amount: amt,
           customerDeduct: pCust,
-          shopDeduct: pShop,
-          profitAmt: valProfit,
-          toCustomer: toCustomer,
+          myPercent: pProfit,
+          shopWaitPercent: pShop,
+          afterDeduct: toCustomer,
+          afterWait: Math.round(amt * (1 - pShop/100)),
+          profitAmt: valProfit, // ส่งยอดกำไรที่เป็นบาทไปบันทึก
           note: copyStr
         })
       }).then(() => {
-        alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
-      }).catch(err => {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการบันทึก: " + err);
-      })
-      .finally(() => {
+        alert("บันทึกกำไร " + valProfit + " บาท สำเร็จ!");
+      }).finally(() => {
         btn.disabled = false;
         btn.innerText = "คำนวณและบันทึก";
       });
 
-    } catch(e) {
-      alert("กรุณากรอกยอดเงินหรือตัวเลขให้ถูกต้องครับ");
-    }
+    } catch(e) { alert("กรุณาตรวจสอบตัวเลข"); }
   }
 
   function copyResult() {
     const text = document.getElementById('copyTarget').innerText;
     if(text === "---") return;
     navigator.clipboard.writeText(text);
-    alert("คัดลอกข้อความ: " + text + " เรียบร้อย!");
+    alert("คัดลอกแล้ว: " + text);
   }
 </script>
 </body>
