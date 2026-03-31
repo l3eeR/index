@@ -82,9 +82,15 @@
       let valCustDeduct = Math.round(amt * (pCust / 100));
       let toCustomer = amt - valCustDeduct;
       let pProfit = pCust - pShop;
-      let valProfit = Math.round(amt * (pProfit / 100)); // กำไรเป็นบาท
+      let valProfit = Math.round(amt * (pProfit / 100));
 
-      // อัปเดต UI
+      // --- ส่วนที่ปรับปรุงใหม่ ---
+      // ถ้า pShop (ร้านหัก) เป็น 0 ให้ยอดหลังรอโอนเป็น 0 
+      // แต่ถ้ามีการหัก ให้คำนวณยอดเงินที่ต้องรอโอนกลับ
+      let valAfterWait = (pShop === 0) ? 0 : Math.round(amt * (1 - pShop/100));
+      // -----------------------
+
+      // อัปเดต UI หน้าจอ
       document.getElementById('v_cust_val').innerHTML = `<b>-${valCustDeduct.toLocaleString()} (${pCust}%)</b>`;
       document.getElementById('v_shop_val').innerText = pShop + "%";
       document.getElementById('v_my_percent').innerText = pProfit + "%";
@@ -93,7 +99,6 @@
       const copyStr = `${amt}-${pCust}%=${toCustomer}`;
       document.getElementById('copyTarget').innerText = copyStr;
 
-      // บันทึกลง Google Sheet
       btn.disabled = true;
       btn.innerText = "กำลังบันทึก...";
 
@@ -106,12 +111,12 @@
           myPercent: pProfit,
           shopWaitPercent: pShop,
           afterDeduct: toCustomer,
-          afterWait: Math.round(amt * (1 - pShop/100)),
-          profitAmt: valProfit, // ส่งยอดกำไรที่เป็นบาทไปบันทึก
+          afterWait: valAfterWait, // ส่งค่า 0 ไปบันทึกถ้าไม่ได้หัก
+          profitAmt: valProfit,
           note: copyStr
         })
       }).then(() => {
-        alert("บันทึกกำไร " + valProfit + " บาท สำเร็จ!");
+        alert("บันทึกข้อมูลเรียบร้อย!");
       }).finally(() => {
         btn.disabled = false;
         btn.innerText = "คำนวณและบันทึก";
