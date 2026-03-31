@@ -3,400 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>คิดเปอร์เซ็นต์ PRO (FINAL)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <title>คิดเปอร์เซ็นต์ PRO v5 (FINAL)</title>
   <style>
-    :root {
-      --primary: #2c3e50;
-      --accent: #3498db;
-      --success: #27ae60;
-      --warning: #f1c40f;
-      --danger: #e74c3c;
-      --bg: #f4f7f6;
-      --card-bg: #ffffff;
-      --text: #333;
-      --border: #ddd;
-      --online: #28a745;
-      --offline: #dc3545;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); padding: 15px; line-height: 1.6; }
-
-    .container { max-width: 500px; margin: 20px auto; }
-    .card { background: var(--card-bg); padding: 25px; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+    :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
+    body { font-family: 'Sarabun', sans-serif; background: var(--bg); padding: 10px; margin: 0; }
+    .container { max-width: 480px; margin: 15px auto; }
+    .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 22px; }
     
-    h2 { text-align: center; margin-bottom: 25px; color: var(--primary); font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .status-badge { font-size: 12px; padding: 4px 8px; border-radius: 5px; color: white; font-weight: bold; }
-    .status-online { background-color: var(--online); }
-    .status-offline { background-color: var(--offline); }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #555; }
+    input { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 12px; font-size: 17px; box-sizing: border-box; outline: none; transition: 0.3s; }
+    input:focus { border-color: var(--accent); background: #f9f9f9; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-calc { background: var(--success); color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(39,174,96,0.3); }
+    .btn-calc:active { transform: scale(0.97); }
 
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #555; }
-    input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; transition: border-color 0.3s; }
-    input:focus { border-color: var(--accent); }
-    input[type="number"]::-webkit-inner-spin-button, 
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.1s; }
-    .btn-primary { background: var(--accent); color: white; margin-top: 10px; }
-    .btn-primary:hover { background: #2980b9; transform: translateY(-1px); }
-    .btn-secondary { background: #ecf0f1; color: var(--primary); margin-top: 10px; }
-    .btn-secondary:hover { background: #dde1e2; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .result-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 25px; border: 1px solid #e9ecef; }
-    .result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
-    .result-item:last-child { border-bottom: none; }
-    .result-label { color: #666; }
-    .result-value { font-weight: bold; color: var(--primary); }
-    .result-value.positive { color: var(--success); }
-    .result-value.negative { color: var(--danger); }
-
-    .final-display { background: var(--accent); color: white; padding: 15px; border-radius: 10px; text-align: center; font-size: 20px; font-weight: bold; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .final-display .copy-btn { background: none; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-left: 10px; }
-    .final-display .copy-btn:hover { background: rgba(255,255,255,0.1); }
-
-    .history-section { margin-top: 30px; }
-    .history-item { background: #fdfdfd; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: background-color 0.2s; }
-    .history-item:hover { background: #f0f0f0; }
-    .history-header { display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-bottom: 5px; }
-    .history-details { font-size: 16px; font-weight: bold; color: var(--primary); }
-    .history-clear-btn { float: right; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
-
-    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 1000; font-size: 14px; }
-
-    .summary-today { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; font-size: 18px; font-weight: bold; color: var(--success); border: 1px solid #c8e6c9; }
+    .result-box { background: #fdfdfd; padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid #f0f0f0; }
+    .res-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 16px; }
+    .hr { border-top: 1px dashed #ddd; margin: 10px 0; }
+    
+    .net-display { text-align: center; margin: 15px 0; }
+    .net-label { font-size: 14px; color: #7f8c8d; }
+    .net-value { font-size: 32px; color: var(--success); font-weight: bold; display: block; }
+    
+    .copy-section { display: flex; align-items: center; background: #eef7ff; padding: 12px; border-radius: 10px; gap: 10px; margin-top: 10px; border: 1px solid #d6eaff; }
+    #copyTarget { flex: 1; font-weight: bold; color: var(--accent); font-size: 18px; text-align: center; }
+    .btn-copy { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="card">
-    <h2>คิดเปอร์เซ็นต์ PRO <span id="statusBadge" class="status-badge status-offline">ออฟไลน์</span></h2>
-
+    <h2>📊 ระบบคิดเงิน & จดบันทึก</h2>
+    
     <div class="form-group">
-      <label for="amount">ยอดเงิน (รองรับสูตร เช่น 1000+702)</label>
-      <input type="text" id="amount" placeholder="ใส่ยอดเงิน" value="" onkeyup="if(event.keyCode === 13) calculateAndSave()">
+      <label>ยอดเงิน (รองรับ 1000+500)</label>
+      <input type="text" id="amount" placeholder="ใส่ยอดเงินที่นี่" inputmode="decimal">
     </div>
 
-    <div class="grid-2">
+    <div class="grid">
       <div class="form-group">
-        <label for="deductPercent">หักออก (%)</label>
-        <input type="number" id="deductPercent" value="10" min="0" max="100">
+        <label>หักออก (%)</label>
+        <input type="number" id="p_deduct" value="10">
       </div>
       <div class="form-group">
-        <label for="receivePercent">รับคืน (%)</label>
-        <input type="number" id="receivePercent" value="10" min="0" max="100">
+        <label>รับคืน (%)</label>
+        <input type="number" id="p_receive" value="10">
       </div>
     </div>
 
     <div class="form-group">
-      <label for="pendingPercent">% รอร้านโอนกลับ</label>
-      <input type="number" id="pendingPercent" value="0" min="0" max="100">
+      <label>% ที่ร้านยังไม่โอน (รอโอน)</label>
+      <input type="number" id="p_pending" value="0">
     </div>
 
-    <button class="btn btn-primary" id="calculateBtn" onclick="calculateAndSave()">คำนวณและบันทึก</button>
-    <button class="btn btn-secondary" onclick="clearForm()">ล้างข้อมูล</button>
+    <button class="btn btn-calc" id="saveBtn" onclick="process()">คำนวณและบันทึกข้อมูล</button>
 
     <div class="result-box">
-      <div class="result-item">
-        <span class="result-label">ยอดรวม</span>
-        <span class="result-value" id="totalAmount">0</span>
+      <div class="res-row"><span>ยอดเงินต้น:</span> <span id="v_amt">0</span></div>
+      <div class="res-row" style="color:var(--danger)"><span>หักออก (%):</span> <span id="v_deduct">0</span></div>
+      <div class="res-row" style="color:var(--success)"><span>รับคืน (%):</span> <span id="v_receive">0</span></div>
+      
+      <div class="hr"></div>
+      
+      <div class="net-display">
+        <span class="net-label">เราได้สุทธิวันนี้</span>
+        <span class="net-value" id="v_net">0</span>
       </div>
-      <div class="result-item">
-        <span class="result-label">หัก <span id="deductDisplay">0</span>%</span>
-        <span class="result-value negative" id="deductedAmount">0</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">รับคืน <span id="receiveDisplay">0</span>%</span>
-        <span class="result-value positive" id="receivedAmount">0</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">เราได้วันนี้</span>
-        <span class="result-value" id="todayReceived">0</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">ยอดหลังหักรอโอน (<span id="pendingDisplay">0</span>%)</span>
-        <span class="result-value" id="pendingNet">0</span>
+
+      <div class="hr"></div>
+      <div class="res-row" style="color:orange"><span>รอร้านโอนกลับ:</span> <span id="v_pending">0</span></div>
+      
+      <div class="copy-section">
+        <span id="copyTarget">0</span>
+        <button class="btn-copy" onclick="copyValue()">คัดลอก</button>
       </div>
     </div>
-
-    <div class="final-display">
-      <span id="finalResultDisplay">0</span>
-      <button class="copy-btn" onclick="copyResult()">คัดลอก</button>
-    </div>
-
-    <div class="summary-today">
-      เราได้จริงๆวันนี้: <span id="actualReceivedToday">0</span> บาท
-    </div>
-
-    <div class="history-section">
-      <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--primary);">ประวัติการคำนวณ <button class="history-clear-btn" onclick="clearHistory()">ล้างประวัติ</button></h3>
-      <div id="historyList"></div>
-    </div>
-
   </div>
 </div>
 
-<div id="toast"></div>
-
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec"; // <<<<<<< ใส่ Web App URL ที่ได้จากการ Deploy ตรงนี้
+  // ** สำคัญ: นำ URL จาก Apps Script มาวางตรงนี้ **
+  const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // loadConfig(); // Removed as per user request
-    loadHistory();
-    checkApiStatus();
-    loadDailySummary(); // Load daily summary on page load
-  });
-
-  async function checkApiStatus() {
-    const statusBadge = document.getElementById('statusBadge');
-    if (!API_URL) {
-      statusBadge.textContent = 'ไม่ได้ตั้งค่า API';
-      statusBadge.classList.remove('status-online');
-      statusBadge.classList.add('status-offline');
-      return;
-    }
-    try {
-      const response = await fetch(API_URL + '?action=getSummary', { mode: 'cors' }); // Changed to getSummary to check API
-      if (response.ok) {
-        statusBadge.textContent = 'ออนไลน์';
-        statusBadge.classList.remove('status-offline');
-        statusBadge.classList.add('status-online');
-      } else {
-        statusBadge.textContent = 'ออฟไลน์';
-        statusBadge.classList.remove('status-online');
-        statusBadge.classList.add('status-offline');
-      }
-    } catch (error) {
-      statusBadge.textContent = 'ออฟไลน์';
-      statusBadge.classList.remove('status-online');
-      statusBadge.classList.add('status-offline');
-    }
-  }
-
-  async function calculateAndSave() {
-    if (!API_URL) {
-      showToast("https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec");
-      return;
-    }
-
-    const amountInput = document.getElementById('amount');
-    let amount;
-    try {
-      // ใช้ eval เพื่อรองรับสูตรคณิตศาสตร์
-      amount = Math.round(eval(amountInput.value.replace(/[^0-9+\-*/.]/g, '')));
-    } catch (e) {
-      showToast("รูปแบบยอดเงินไม่ถูกต้อง");
-      return;
-    }
-
-    if (isNaN(amount) || amount <= 0) {
-      showToast("กรุณาใส่ยอดเงินที่ถูกต้อง");
-      return;
-    }
-
-    const deductPercent = Number(document.getElementById('deductPercent').value);
-    const receivePercent = Number(document.getElementById('receivePercent').value);
-    const pendingPercent = Number(document.getElementById('pendingPercent').value);
-
-    if (isNaN(deductPercent) || isNaN(receivePercent) || isNaN(pendingPercent)) {
-      showToast("กรุณาใส่เปอร์เซ็นต์ที่ถูกต้อง");
-      return;
-    }
-
-    const calculateBtn = document.getElementById('calculateBtn');
-    calculateBtn.disabled = true;
-    calculateBtn.textContent = 'กำลังคำนวณ...';
-
-    // Calculations
-    const totalAmount = amount;
-    const deductedAmount = Math.round(amount * (deductPercent / 100));
-    const receivedAmount = Math.round(amount * (receivePercent / 100));
-    const todayReceived = Math.round(totalAmount - deductedAmount + receivedAmount); // เราได้วันนี้
+  function process() {
+    const btn = document.getElementById('saveBtn');
+    const rawInput = document.getElementById('amount').value;
     
-    let pendingNet = 0; // Default to 0 if pendingPercent is 0
-    if (pendingPercent > 0) {
-      pendingNet = Math.round(todayReceived - (amount * (pendingPercent / 100)));
-    } 
-
-    // Display results
-    document.getElementById('totalAmount').textContent = formatNumber(totalAmount);
-    document.getElementById('deductDisplay').textContent = deductPercent;
-    document.getElementById('deductedAmount').textContent = formatNumber(deductedAmount);
-    document.getElementById('receiveDisplay').textContent = receivePercent;
-    document.getElementById('receivedAmount').textContent = formatNumber(receivedAmount);
-    document.getElementById('todayReceived').textContent = formatNumber(todayReceived);
-    document.getElementById('pendingDisplay').textContent = pendingPercent;
-    document.getElementById('pendingNet').textContent = formatNumber(pendingNet);
-    document.getElementById('finalResultDisplay').textContent = `${formatNumber(todayReceived)} - ${pendingPercent}% = ${formatNumber(pendingNet)}`;
-
-    // Save to Google Sheet
     try {
-      const payload = {
-        amount: totalAmount,
-        percent: deductPercent,
-        receivePercent: receivePercent,
-        pendingPercent: pendingPercent,
-        final: todayReceived, // ยอดหลังหัก (เราได้วันนี้)
-        pendingNet: pendingNet, // ยอดหลังหักรอโอน
-        note: "-" // ไม่มีประเภทรายการแล้ว
-      };
+      // รองรับการบวกเลขในช่อง input
+      let amt = eval(rawInput.replace(/[^0-9+\-*/.]/g, ''));
+      let pDeduct = Number(document.getElementById('p_deduct').value);
+      let pReceive = Number(document.getElementById('p_receive').value);
+      let pPending = Number(document.getElementById('p_pending').value);
 
-      const response = await fetch(API_URL, {
+      // สูตรคำนวณตามที่ต้องการ
+      let valDeduct = Math.round(amt * (pDeduct / 100));
+      let valReceive = Math.round(amt * (pReceive / 100));
+      let netToday = Math.round(amt - valDeduct + valReceive); // ยอด "เราได้วันนี้"
+      let valPending = Math.round(amt * (pPending / 100));
+      let finalRemain = netToday - valPending;
+
+      // แสดงผลบนหน้าจอ
+      document.getElementById('v_amt').innerText = amt.toLocaleString();
+      document.getElementById('v_deduct').innerText = "-" + valDeduct.toLocaleString();
+      document.getElementById('v_receive').innerText = "+" + valReceive.toLocaleString();
+      document.getElementById('v_net').innerText = netToday.toLocaleString();
+      document.getElementById('v_pending').innerText = valPending.toLocaleString();
+      document.getElementById('copyTarget').innerText = netToday.toLocaleString();
+
+      // บันทึกข้อมูลไปที่ Google Sheet
+      btn.disabled = true; 
+      btn.innerText = "กำลังบันทึกข้อมูล...";
+
+      fetch(API_URL, {
         method: "POST",
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        mode: "no-cors",
+        body: JSON.stringify({
+          amount: amt, 
+          percent: pDeduct, 
+          receivePercent: pReceive,
+          pendingPercent: pPending, 
+          todayNet: netToday, // เราได้วันนี้
+          pendingAmt: valPending, 
+          finalRemain: finalRemain
+        })
+      }).then(() => {
+        alert("บันทึกข้อมูลเรียบร้อย!");
+      }).catch(err => alert("เกิดข้อผิดพลาด: " + err))
+      .finally(() => { 
+        btn.disabled = false; 
+        btn.innerText = "คำนวณและบันทึกข้อมูล"; 
       });
-      
-      showToast("บันทึกสำเร็จ ✓ (ข้อมูลกำลังส่งไปยัง Sheet)");
-      saveToHistory(payload, todayReceived, pendingNet);
-      loadDailySummary(); // Reload daily summary after saving
-    } catch (e) {
-      console.error(e);
-      showToast("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
-    } finally {
-      calculateBtn.disabled = false;
-      calculateBtn.textContent = 'คำนวณและบันทึก';
+
+    } catch(e) {
+      alert("กรุณาใส่ตัวเลขให้ถูกต้องครับ");
     }
   }
 
-  function clearForm() {
-    document.getElementById('amount').value = '';
-    document.getElementById('deductPercent').value = '10';
-    document.getElementById('receivePercent').value = '10';
-    document.getElementById('pendingPercent').value = '0';
-
-    document.getElementById('totalAmount').textContent = '0';
-    document.getElementById('deductDisplay').textContent = '0';
-    document.getElementById('deductedAmount').textContent = '0';
-    document.getElementById('receiveDisplay').textContent = '0';
-    document.getElementById('receivedAmount').textContent = '0';
-    document.getElementById('todayReceived').textContent = '0';
-    document.getElementById('pendingDisplay').textContent = '0';
-    document.getElementById('pendingNet').textContent = '0';
-    document.getElementById('finalResultDisplay').textContent = '0';
-    document.getElementById('actualReceivedToday').textContent = '0';
-    document.getElementById('amount').focus();
-  }
-
-  function formatNumber(num) {
-    return Math.round(num).toLocaleString(); // ปัดเศษและไม่แสดงทศนิยม
-  }
-
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-  }
-
-  function copyResult() {
-    const resultText = document.getElementById('finalResultDisplay').textContent;
-    navigator.clipboard.writeText(resultText).then(() => {
-      showToast('คัดลอกผลลัพธ์แล้ว!');
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-      showToast('คัดลอกไม่สำเร็จ');
-    });
-  }
-
-  // History functions
-  const MAX_HISTORY = 20;
-
-  function loadHistory() {
-    const historyList = document.getElementById('historyList');
-    historyList.innerHTML = '';
-    const history = JSON.parse(localStorage.getItem('percentageHistory')) || [];
-    history.forEach(item => addHistoryItemToDOM(item, false));
-  }
-
-  function saveToHistory(payload, todayReceived, pendingNet) {
-    const history = JSON.parse(localStorage.getItem('percentageHistory')) || [];
-    const newItem = {
-      timestamp: new Date().toLocaleString('th-TH'),
-      amount: payload.amount,
-      deductPercent: payload.percent,
-      receivePercent: payload.receivePercent,
-      pendingPercent: payload.pendingPercent,
-      todayReceived: todayReceived,
-      pendingNet: pendingNet,
-      note: payload.note
-    };
-    history.unshift(newItem); // Add to the beginning
-    if (history.length > MAX_HISTORY) {
-      history.pop(); // Remove oldest if over limit
-    }
-    localStorage.setItem('percentageHistory', JSON.stringify(history));
-    addHistoryItemToDOM(newItem, true); // Add to DOM immediately
-  }
-
-  function addHistoryItemToDOM(item, prepend = true) {
-    const historyList = document.getElementById('historyList');
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.innerHTML = `
-      <div class="history-header">
-        <span>${item.timestamp}</span>
-        <span>${item.note}</span>
-      </div>
-      <div class="history-details">
-        ยอดรวม: ${formatNumber(item.amount)} | ได้วันนี้: ${formatNumber(item.todayReceived)} | หลังรอโอน: ${formatNumber(item.pendingNet)}
-      </div>
-    `;
-    div.onclick = () => loadHistoryItem(item);
-    if (prepend) {
-      historyList.prepend(div);
-      if (historyList.children.length > MAX_HISTORY) {
-        historyList.lastChild.remove();
-      }
-    } else {
-      historyList.appendChild(div);
-    }
-  }
-
-  function loadHistoryItem(item) {
-    document.getElementById('amount').value = item.amount;
-    document.getElementById('deductPercent').value = item.deductPercent;
-    document.getElementById('receivePercent').value = item.receivePercent;
-    document.getElementById('pendingPercent').value = item.pendingPercent;
-    calculateAndSave();
-  }
-
-  function clearHistory() {
-    if (confirm('คุณต้องการล้างประวัติการคำนวณทั้งหมดใช่หรือไม่?')) {
-      localStorage.removeItem('percentageHistory');
-      loadHistory();
-      showToast('ล้างประวัติแล้ว');
-    }
-  }
-
-  async function loadDailySummary() {
-    if (!API_URL) return;
-    try {
-      const response = await fetch(API_URL + '?action=getSummary', { mode: 'cors' });
-      const json = await response.json();
-      if (json.status === 'success' && json.data) {
-        const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const todayData = json.data.find(item => {
-          const itemDate = new Date(item.date).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          return itemDate === today;
-        });
-
-        let actualReceivedToday = 0;
-        if (todayData) {
-          actualReceivedToday = Math.round(todayData.todayReceived - todayData.pendingNet);
-        }
-        document.getElementById('actualReceivedToday').textContent = formatNumber(actualReceivedToday);
-      }
-    } catch (error) {
-      console.error('Error loading daily summary:', error);
-      // showToast('โหลดสรุปยอดวันนี้ไม่สำเร็จ'); // Suppress toast for this for cleaner UI
-    }
+  function copyValue() {
+    const text = document.getElementById('copyTarget').innerText.replace(/,/g, '');
+    navigator.clipboard.writeText(text);
+    alert("คัดลอกยอด " + text + " เรียบร้อย!");
   }
 </script>
 </body>
