@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบคำนวณกำไร & ยอดโอนลูกค้า</title>
+  <title>ระบบคำนวณกำไร & ยอดโอนลูกค้า (Full Version)</title>
   <style>
     :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f8f9fa; }
     body { font-family: 'Sarabun', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
@@ -22,7 +22,9 @@
     .btn-main:disabled { background: #ccc; }
 
     .result-section { background: #fdfdfd; padding: 20px; border-radius: 18px; margin-top: 20px; border: 1px solid #f0f0f0; }
-    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+    .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+    .row span:last-child { font-weight: bold; }
+    
     .profit-box { text-align: center; margin: 15px 0; padding: 15px; background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; }
     .profit-label { font-size: 14px; color: #27ae60; font-weight: bold; }
     .profit-value { font-size: 32px; color: #1e8449; font-weight: bold; display: block; }
@@ -59,10 +61,14 @@
     <div class="result-section">
       <div class="row"><span>หักลูกค้า:</span> <span id="v_cust_val" style="color:var(--danger)">0</span></div>
       <div class="row"><span>ร้านหักเรา:</span> <span id="v_shop_val">0</span></div>
+      <div class="row" style="background: #fff9db; padding: 10px; border-radius: 8px;">
+        <span>เปอร์เซ็นต์ที่เราได้:</span> 
+        <span id="v_my_percent" style="color:var(--success)">0%</span>
+      </div>
       
       <div class="profit-box">
         <span class="profit-label">กำไรสุทธิที่เราได้จริง</span>
-        <span class="profit-value" id="v_my_profit">0</span>
+        <span class="profit-value" id="v_my_profit">0 บาท</span>
       </div>
 
       <div class="row" style="border:none"><span>ยอดโอนให้ลูกค้า:</span></div>
@@ -75,7 +81,7 @@
 </div>
 
 <script>
-  // บันทึก URL จาก Google Apps Script ที่นี่
+  // URL จาก Google Apps Script ของคุณ
   const API_URL = "https://script.google.com/macros/s/AKfycby3T07pNcYTTKKulTeQ0wUATjOc_3Y5nd0P68ZYft-keLonW4nB6K6uLXIfya0JkXk/exec";
 
   function calculateAndSave() {
@@ -83,28 +89,30 @@
     const rawInput = document.getElementById('amount').value;
 
     try {
-      // 1. คำนวณค่า
-      let amt = eval(rawInput.replace(/[^0-9+\-*/.]/g, ''));
+      // 1. คำนวณค่าพื้นฐาน
+      let amt = eval(rawInput.replace(/[^0-9+\-*/.]/g, '')); // รองรับการบวกเลข
       let pCust = Number(document.getElementById('p_cust').value);
       let pShop = Number(document.getElementById('p_shop').value);
 
-      // ยอดหักลูกค้า
+      // ยอดหักลูกค้า และยอดที่จะโอนให้ลูกค้า
       let valCustDeduct = Math.round(amt * (pCust / 100));
       let toCustomer = amt - valCustDeduct;
 
-      // ยอดกำไรเรา (หักลูกค้า - ร้านหักเรา)
+      // ส่วนต่างกำไร (%) และ กำไรสุทธิ (บาท)
       let pProfit = pCust - pShop;
       let valProfit = Math.round(amt * (pProfit / 100));
 
-      // 2. แสดงผลหน้าเว็บ
-      document.getElementById('v_cust_val').innerText = "-" + valCustDeduct.toLocaleString();
-      document.getElementById('v_shop_val').innerText = (pShop) + "%";
+      // 2. อัปเดตการแสดงผลหน้าเว็บ
+      document.getElementById('v_cust_val').innerText = "-" + valCustDeduct.toLocaleString() + " (" + pCust + "%)";
+      document.getElementById('v_shop_val').innerText = pShop + "%";
+      document.getElementById('v_my_percent').innerText = pProfit + "%";
       document.getElementById('v_my_profit').innerText = valProfit.toLocaleString() + " บาท";
       
+      // ข้อความสำหรับคัดลอก (ส่งให้ลูกค้า)
       const copyStr = `${amt}-${pCust}%=${toCustomer}`;
       document.getElementById('copyTarget').innerText = copyStr;
 
-      // 3. ส่งข้อมูลไป Google Sheet
+      // 3. ส่งข้อมูลไปบันทึกใน Google Sheet
       btn.disabled = true;
       btn.innerText = "กำลังบันทึก...";
 
@@ -120,15 +128,18 @@
           note: copyStr
         })
       }).then(() => {
-        alert("บันทึกเรียบร้อย!");
-      }).catch(err => alert("Error: " + err))
+        alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+      }).catch(err => {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการบันทึก: " + err);
+      })
       .finally(() => {
         btn.disabled = false;
         btn.innerText = "คำนวณและบันทึก";
       });
 
     } catch(e) {
-      alert("กรุณากรอกตัวเลขให้ถูกต้อง");
+      alert("กรุณากรอกยอดเงินหรือตัวเลขให้ถูกต้องครับ");
     }
   }
 
@@ -136,7 +147,7 @@
     const text = document.getElementById('copyTarget').innerText;
     if(text === "---") return;
     navigator.clipboard.writeText(text);
-    alert("คัดลอกยอดส่งลูกค้า: " + text);
+    alert("คัดลอกข้อความ: " + text + " เรียบร้อย!");
   }
 </script>
 </body>
